@@ -117,19 +117,6 @@ void ValidatorEngineConsole::got_result(bool success) {
 }
 
 void ValidatorEngineConsole::show_help(std::string command, td::Promise<td::BufferSlice> promise) {
-  if (command.size() == 0) {
-    td::TerminalIO::out() << "list of available commands:\n";
-    for (auto& cmd : query_runners_) {
-      td::TerminalIO::out() << cmd.second->help() << "\n";
-    }
-  } else {
-    auto it = query_runners_.find(command);
-    if (it != query_runners_.end()) {
-      td::TerminalIO::out() << it->second->help() << "\n";
-    } else {
-      td::TerminalIO::out() << "unknown command '" << command << "'\n";
-    }
-  }
   promise.set_value(td::BufferSlice{});
 }
 
@@ -138,16 +125,10 @@ void ValidatorEngineConsole::show_license(td::Promise<td::BufferSlice> promise) 
   promise.set_value(td::BufferSlice{});
 }
 
-void ValidatorEngineConsole::parse_line(td::BufferSlice data) {
+void ValidatorEngineConsole::parse_line(std::string data_str) {
   for (const auto &item : query_runners_)
   {
-    auto data_str = data.data();
-    std::cout << "lll >> parse_line: data_str = " << data_str << std::endl;
-    std::cout << "lll >> parse_line: strlen(data_str) = " << strlen(data_str) << std::endl;
-    std::string query_msg(data_str);
-    std::cout << "lll >> parse_line: query_msg.length() = " << query_msg.length() << std::endl;
-    std::cout << "lll >> parse_line: query_msg = " << query_msg << std::endl;
-    item.second->run(actor_id(this), query_msg);
+    item.second->run(actor_id(this), data_str);
   }
 }
 
@@ -206,7 +187,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t * data, size_t size) {
   }
 
   g_scheduler.run_in_context([&] {
-    td::actor::send_closure(g_validator_engine_console_actor_own, &ValidatorEngineConsole::add_cmd, td::BufferSlice((const char *)data, size));
+    std::string str;
+    for (size_t i = 0; i < size; i++)
+    {
+      str += (char)data[i];
+    }
+    td::actor::send_closure(g_validator_engine_console_actor_own, &ValidatorEngineConsole::add_cmd, str);
   });
   sleep(4);
   std::cout << "=================================================\n\n" << std::endl;

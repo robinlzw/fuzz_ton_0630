@@ -24,7 +24,7 @@ class ValidatorEngineConsole : public td::actor::Actor {
 
   td::Timestamp fail_timeout_;
   bool ex_mode_ = false;
-  std::vector<td::BufferSlice> ex_queries_;
+  std::vector<std::string> ex_queries_;
 
   std::unique_ptr<ton::adnl::AdnlExtClient::Callback> make_callback();
 
@@ -32,16 +32,7 @@ class ValidatorEngineConsole : public td::actor::Actor {
   void add_query_runner(std::unique_ptr<QueryRunner> runner) {
     std::cout << "00 runner = " << runner.get() << std::endl;
     if (runner)
-    {
-      // static std::string name = runner->name();
-      // if (query_runners_.find(name) == query_runners_.end())
-      // {
-      //   std::cout << "name = " << name << std::endl;
-      //   query_runners_[name] = std::move(runner);
-      //   std::cout << "runner = " << runner.get() << std::endl;
-      //   std::cout << "query_runners_[name] = " << query_runners_[name].get() << std::endl;
-      // }
-      
+    {      
       query_runners_[runner->name()] = std::move(runner);
       for (const auto & item : query_runners_)
       {
@@ -71,7 +62,7 @@ class ValidatorEngineConsole : public td::actor::Actor {
   void set_private_key(td::BufferSlice file_name);
   void set_public_key(td::BufferSlice file_name);
 
-  void add_cmd(td::BufferSlice data) {
+  void add_cmd(std::string data) {
     std::cout << "add_cmd done\n";
     ex_mode_ = true;
     ex_queries_.push_back(std::move(data));
@@ -111,7 +102,7 @@ class ValidatorEngineConsole : public td::actor::Actor {
   void show_help(std::string command, td::Promise<td::BufferSlice> promise);
   void show_license(td::Promise<td::BufferSlice> promise);
 
-  void parse_line(td::BufferSlice data);
+  void parse_line(std::string data_str);
   ValidatorEngineConsole() {
   }
 

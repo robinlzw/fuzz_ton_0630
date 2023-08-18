@@ -78,7 +78,7 @@ class Query : public td::actor::Actor {
 
  protected:
   td::actor::ActorId<ValidatorEngineConsole> console_;
-  const std::string &query_msg_;
+  std::string query_msg_;
 };
 
 class GetOverlaysStatsQuery : public Query {

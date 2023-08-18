@@ -111,19 +111,6 @@ void ValidatorEngineConsole::got_result(bool success) {
 }
 
 void ValidatorEngineConsole::show_help(std::string command, td::Promise<td::BufferSlice> promise) {
-  if (command.size() == 0) {
-    td::TerminalIO::out() << "list of available commands:\n";
-    for (auto& cmd : query_runners_) {
-      td::TerminalIO::out() << cmd.second->help() << "\n";
-    }
-  } else {
-    auto it = query_runners_.find(command);
-    if (it != query_runners_.end()) {
-      td::TerminalIO::out() << it->second->help() << "\n";
-    } else {
-      td::TerminalIO::out() << "unknown command '" << command << "'\n";
-    }
-  }
   promise.set_value(td::BufferSlice{});
 }
 
@@ -132,7 +119,7 @@ void ValidatorEngineConsole::show_license(td::Promise<td::BufferSlice> promise) 
   promise.set_value(td::BufferSlice{});
 }
 
-void ValidatorEngineConsole::parse_line(td::BufferSlice data) {
+void ValidatorEngineConsole::parse_line(std::string data) {
   for (const auto &item : query_runners_)
   {
     item.second->run(actor_id(this), data.data());
@@ -184,11 +171,7 @@ int main() {
     td::actor::send_closure(x, &ValidatorEngineConsole::run);
   });
 
-  scheduler.run_in_context([&] {
-  });
-
-  // scheduler.run();
   sch.join();
-  td::actor::send_closure(x, &ValidatorEngineConsole::add_cmd, td::BufferSlice{"xxx"});
+  td::actor::send_closure(x, &ValidatorEngineConsole::add_cmd, "xxx");
   return 0;
 }
